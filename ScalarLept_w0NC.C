@@ -24,7 +24,7 @@ const double h=15000;
 TH1D *Init_Nu_Mom;
 TH1D *Init_Nu_Theta; 
 TH1D *Init_Nu_CosTheta; 
-TH1D*Init_Nu_Phi;
+TH1D *Init_Nu_Phi;
 TH2D *Oscillogram;
 TH1D *Fin_CC_Lept_Mom;
 TH1D *Fin_CC_Lept_Theta;
@@ -37,6 +37,7 @@ TH1D *Fin_Prot_Mult;
 TH1D *Fin_PiPlus_Mult;
 TH1D *Fin_PiMinus_Mult;
 TH1D *Fin_PiZero_Mult;
+TH1D *Fin_Gamma_Mom;
 
 std::vector<std::string> split(const std::string& str, char delimiter) {
     std::vector<std::string> tokens;
@@ -200,65 +201,6 @@ double phi_nu(const double tStdHepP4[],double fAbsoluteParticleMomentum, int j){
 }
 
 
-// void lepton_kinematics(const double tStdHepP4[],int j,const int tStdHepPdg[],
-//                     const std::map<std::string, std::variant<int,float, std::string>>& dictionary){
-    
-//     auto [fAbsoluteParticleMomentum, fInvMass,fKE] = kinematics(tStdHepP4, j);
-    
-
-//     double muon_ke=getDoubleValue(dictionary.at("Muon_KE"));
-//     double electron_ke=getDoubleValue(dictionary.at("Electron_KE"));
-
-//     //std::cout<<"Lepton_mom is "<<fAbsoluteParticleMomentum<<" and fKE_lept is  "<<fKE<< endl;
-   
-
-//     if ((tStdHepPdg[j] == 13 || tStdHepPdg[j] == -13) && fKE >= muon_ke || 
-//         (tStdHepPdg[j] == 11 || tStdHepPdg[j] == -11) && fKE >= electron_ke) {
-//         // //std::cout << "lepton loop for j: " << j << " and status: " << tStdHepStatus[j] <<" and pdg " << tStdHepPdg[j]<< std::endl;
-
-
-//         pdgs.push_back(tStdHepPdg[j]);
-//         masses.push_back(fInvMass);
-//         energies.push_back(fKE);
-//         pxs.push_back(tStdHepP4[4 * j]);
-//         pys.push_back(tStdHepP4[4 * j + 1]);
-//         pzs.push_back(tStdHepP4[4 * j + 2]);
-//         costheta_arr.push_back(tStdHepP4[4*j+1]/fAbsoluteParticleMomentum);
-//         theta_arr.push_back((180./PI)*acos(tStdHepP4[4*j+1]/fAbsoluteParticleMomentum));
-
-//         tot_fKE += fKE;
-//         tot_fpx += tStdHepP4[4 * j];
-//         tot_fpy += tStdHepP4[4 * j + 1];
-//         tot_fpz += tStdHepP4[4 * j + 2];
-
-//         Fin_CC_Lept_Mom->Fill(1000. * fAbsoluteParticleMomentum);
-//         Fin_CC_Lept_CosTheta->Fill(tStdHepP4[4 * j + 1] / fAbsoluteParticleMomentum);
-//         Fin_CC_Lept_Theta->Fill(acos(tStdHepP4[4 * j + 1] / fAbsoluteParticleMomentum));
-//     }
-
-//     else {
-
-
-//         pdgs.push_back(tStdHepPdg[j]);
-//         masses.push_back(fInvMass);
-//         energies.push_back(fKE);
-//         pxs.push_back(tStdHepP4[4 * j]);
-//         pys.push_back(tStdHepP4[4 * j + 1]);
-//         pzs.push_back(tStdHepP4[4 * j + 2]);
-//         costheta_arr.push_back(tStdHepP4[4*j+1]/fAbsoluteParticleMomentum);
-//         theta_arr.push_back((180./PI)*acos(tStdHepP4[4*j+1]/fAbsoluteParticleMomentum));
-
-//         tot_fKE += fKE;
-//         tot_fpx += tStdHepP4[4 * j];
-//         tot_fpy += tStdHepP4[4 * j + 1];
-//         tot_fpz += tStdHepP4[4 * j + 2];
-
-//         Fin_CC_Lept_Mom->Fill(1000. * fAbsoluteParticleMomentum);
-//         Fin_CC_Lept_CosTheta->Fill(tStdHepP4[4 * j + 1] / fAbsoluteParticleMomentum);
-//         Fin_CC_Lept_Theta->Fill(acos(tStdHepP4[4 * j + 1] / fAbsoluteParticleMomentum));
-    
-//     }
-// }
 
 void finalparticles_info(const double tStdHepP4[],int j,const int tStdHepPdg[],std::vector<int>& pdgs, std::vector<double>& masses,
                     std::vector<double>& energies, std::vector<double>& pxs,
@@ -266,9 +208,8 @@ void finalparticles_info(const double tStdHepP4[],int j,const int tStdHepPdg[],s
                     const std::map<std::string, std::variant<int,float, std::string>>& dictionary){
 
     auto [fAbsoluteParticleMomentum, fInvMass,fKE] = kinematics(tStdHepP4, j);
-
+    auto [fAbsoluteParticleMomentum_gamma, fKE_gamma] = kinematics_massless(tStdHepP4, j);
     //define costheta and theta array
-
 
     double prot_ke= getDoubleValue(dictionary.at("Proton_KE"));
     double kaon_ke=getDoubleValue(dictionary.at("K+-_KE"));
@@ -279,8 +220,10 @@ void finalparticles_info(const double tStdHepP4[],int j,const int tStdHepPdg[],s
         (tStdHepPdg[j]==211 && fKE>=pion_ke) || 
         (tStdHepPdg[j]==-211 && fKE>=pion_ke) ||
         (tStdHepPdg[j]==111) || 
-        ((tStdHepPdg[j]== 321 || tStdHepPdg[j]== -321 || tStdHepPdg[j]== 130 || tStdHepPdg[j]== 310) && fKE>=kaon_ke)) {        
-        
+        ((tStdHepPdg[j]== 321 || tStdHepPdg[j]== -321 || tStdHepPdg[j]== 130 || tStdHepPdg[j]== 310) && fKE>=kaon_ke)||
+        ((tStdHepPdg[j] == 13 || tStdHepPdg[j] == -13) && fKE >= muon_ke) || 
+        ((tStdHepPdg[j] == 11 || tStdHepPdg[j] == -11) && fKE >= electron_ke)||        
+        (tStdHepPdg[j] == 22 && fKE_gamma >= 2*electron_ke)){
         
         
         pdgs.push_back(tStdHepPdg[j]);
@@ -300,7 +243,9 @@ void finalparticles_info(const double tStdHepP4[],int j,const int tStdHepPdg[],s
         if (tStdHepPdg[j]==2212){
             Fin_Prot_Mom->Fill(1000.*fAbsoluteParticleMomentum);
         }
-    
+        if (tStdHepPdg[j]==22){
+             Fin_Gamma_Mom->Fill(1000.*fAbsoluteParticleMomentum_gamma);
+        }
         if (tStdHepPdg[j]==211){
             Fin_PiPlus_Mom->Fill(1000.*fAbsoluteParticleMomentum);
         }
@@ -315,48 +260,8 @@ void finalparticles_info(const double tStdHepP4[],int j,const int tStdHepPdg[],s
     }
     
 }
+    
 
-// int max_num=0;
-
-// void do_resize(std::vector<int>& pdgs, std::vector<double>& masses,
-//     std::vector<double>& energies, std::vector<double>& pxs,
-//     std::vector<double>& pys, std::vector<double>& pzs,std::vector<double>& costheta_arr,std::vector<double>& theta_arr){
-//     if (pdgs.size() < max_num) 
-//     {
-//     pdgs.resize(max_num, 0);
-//     }
-
-//     if (energies.size() < max_num) 
-//     {
-//     energies.resize(max_num, 0);
-//     }
-//     if (masses.size() < max_num) 
-//     {
-//     masses.resize(max_num, 0);
-//     }
-//     if (pxs.size() < max_num) 
-//     {
-//     pxs.resize(max_num, 0);
-//     }
-//     if (pys.size() < max_num) 
-//     {
-//     pys.resize(max_num, 0);
-//     }
-//     if (pzs.size() < max_num) 
-//     {
-//     pzs.resize(max_num, 0);
-//     }
-//     if (costheta_arr.size() < max_num) 
-//     {
-//     costheta_arr.resize(max_num, 0);
-//     }
-//     if (theta_arr.size() < max_num) 
-//     {
-//     theta_arr.resize(max_num, 0);
-//     }
-
-
-// }
 
    
 void ScalarLept_w0NC(const std::string& input_file) {
@@ -365,20 +270,6 @@ void ScalarLept_w0NC(const std::string& input_file) {
 
 
     std::map<std::string, std::variant<int,float, std::string>> dictionary = process_file(input_file);
-
-    // Print the contents of the dictionary in the order they were read
-// Print the contents of the dictionary in the order they were read
-    // for (const auto& pair : dictionary) {
-    //     //std::cout << pair.first << ": ";
-    //     if (std::holds_alternative<int>(pair.second)) {
-    //         //std::cout << std::get<int>(pair.second);
-    //     } else if (std::holds_alternative<float>(pair.second)) {
-    //         //std::cout << std::get<float>(pair.second);
-    //     } else {
-    //         //std::cout << std::get<std::string>(pair.second);
-    //     }
-    //     //std::cout << std::endl;
-    // }
 
 
     // Load ROOT file (example usage)
@@ -420,59 +311,12 @@ void ScalarLept_w0NC(const std::string& input_file) {
         }
     }
 
-    // // Output the result
-    // //std::cout << "Init_PDG_arr: ";
-    // for (const auto& value : Init_PDG_arr) {
-    //     if (std::holds_alternative<int>(value)) {
-    //         //std::cout << std::get<int>(value) << " ";
-    //     }
-    //     // } else if (std::holds_alternative<std::string>(value)) {
-    //     //     //std::cout << std::get<std::string>(value) << " ";
-    //     // }
-    // }
-    // //std::cout << std::endl;
-
-    // double Initial_Nu_Energy_min;
-    // double Initial_Nu_Energy_max;
-
-    // std::variant<int, float, std::string> Initial_Nu_Energy_min;
-    // std::variant<int, float, std::string> Initial_Nu_Energy_max;
     std::variant<int, float, std::string> num_proton_value;
     std::variant<int, float, std::string> num_pion_value;
     std::variant<int, float, std::string> Final_lepton_PDG;
 
-    // getValue(dictionary,"Initial_Nu_Energy_min", Initial_Nu_Energy_min);
-    // getValue(dictionary,"Initial_Nu_Energy_max",Initial_Nu_Energy_max);
-
     double Min_Nu_energy= getDoubleValue(dictionary.at("Initial_Nu_Energy_min"));
     double Max_Nu_energy=getDoubleValue(dictionary.at("Initial_Nu_Energy_max"));
-
-    // //std::cout << "Min_Nu: " << Min_Nu_energy << std::endl;
-    // //std::cout << "Max_Nu:" << Max_Nu_energy<< std::endl;
-
-    // if (std::holds_alternative<int>(dictionary.at("Initial_Nu_Energy_min"))) {
-    //     Initial_Nu_Energy_min = static_cast<double>(std::get<int>(dictionary.at("Initial_Nu_Energy_min")));
-    // } else if (std::holds_alternative<float>(dictionary.at("Initial_Nu_Energy_min"))) {
-    //     Initial_Nu_Energy_min = static_cast<double>(std::get<float>(dictionary.at("Initial_Nu_Energy_min")));
-    // }
-
-    // if (std::holds_alternative<int>(dictionary.at("Initial_Nu_Energy_max"))) {
-    //     Initial_Nu_Energy_max = static_cast<double>(std::get<int>(dictionary.at("Initial_Nu_Energy_max")));
-    // } else if (std::holds_alternative<float>(dictionary.at("Initial_Nu_Energy_max"))) {
-    //     Initial_Nu_Energy_max = static_cast<double>(std::get<float>(dictionary.at("Initial_Nu_Energy_max")));
-    // }
-
-
-    // if (std::holds_alternative<int>(Initial_Nu_Energy_min)) {
-    // } else if (std::holds_alternative<float>(Initial_Nu_Energy_min)) {
-    //     //std::cout << "Min_nu(float) " << std::get<float>(Initial_Nu_Energy_min) << std::endl;
-    // }
-
-    // if (std::holds_alternative<int>(Initial_Nu_Energy_max)) {
-    //    //std::cout << "Max_nu(int): " << std::get<int>(Initial_Nu_Energy_max) << std::endl;
-    // } else if (std::holds_alternative<float>(Initial_Nu_Energy_max)) {
-    //     //std::cout << "Max_nu(float) " << std::get<float>(Initial_Nu_Energy_max) << std::endl;
-    // }
 
 
     getValue(dictionary,"num_proton",num_proton_value);
@@ -660,6 +504,12 @@ void ScalarLept_w0NC(const std::string& input_file) {
     Fin_PiZero_Mult->SetLineColor(kGreen+1);
     Fin_PiZero_Mult->SetLineWidth(3);
 
+    Fin_Gamma_Mom = new TH1D((last_name + "Fin_Gamma_Mom").c_str(), (last_name + "Final State #gamma Momentum, hA 2018").c_str(), 1000, 0., 500.);
+    Fin_Gamma_Mom->GetXaxis()->SetTitle("Final State #gamma Momentum [MeV/c]");
+    Fin_Gamma_Mom->GetYaxis()->SetTitle("Counts");
+    Fin_Gamma_Mom->SetLineColor(kBlue+1);
+    Fin_Gamma_Mom->SetLineWidth(3);
+
     int tStdHepN = 0; //the num of particles in an event
     int tStdHepStatus[NMaxParticlesPerEvent] = {0}; // an array with the all the number of elements in the tStdHepStatus set to 0
     int tStdHepPdg[NMaxParticlesPerEvent] = {0};
@@ -683,135 +533,14 @@ void ScalarLept_w0NC(const std::string& input_file) {
     double kaon_ke=getDoubleValue(dictionary.at("K+-_KE"));
     double pion_ke=getDoubleValue(dictionary.at("Pi+-_KE"));
 
-    //For printing different KEs:
-    // //std::cout << "Proton KE: " << prot_ke << std::endl;
-    // //std::cout << "Pi+- KE: " << pion_ke<< std::endl;
-    // //std::cout << "K+- KE: " << kaon_ke << std::endl;
 
-    // //std::cout << "Muon KE: " << muon_ke << std::endl;
-    // //std::cout << "Electron KE: " << electron_ke << std::endl;
-
-    ////////////////////////////// If we want to resize the vectors,uncomment the next code/////////////////////
-
-    // int max_num=0;
-    // for(int i=0; i<Num_events; i++)
-    // {   //Initializing multiplicity variables
-    //     SignalTree->GetEntry(i);
-        
-    //     if ( abs( tStdHepPdg[0] - tStdHepPdg[4] ) > 1 ) continue;
-
-    //     if(i%100000==0){std::cout << "The current event number in the 1st event loop is " << i << " of " << NumberEntries << endl;} 
-
-    //     int n_prot=0, n_piplus=0, n_piminus=0, n_pizero=0, n_pi=0, visible_count=0;
-
-    //     energies.clear(); masses.clear(); pxs.clear(); pys.clear(); pzs.clear();costheta_arr.clear();theta_arr.clear();
-    //     pdgs.clear();
-
-    //     double tot_fpx=0,tot_fpy=0,tot_fpz=0;
-    //     double tot_fKE=0;
-
-    //     bool skip_event = false;
-        
-    //     //Print out the current event number to screen 
-    //     // //std::cout << "The current event number is " << i << " of " << NumberEntries << endl;
-    //     //Get the event entry information
-        
-        
-
-    //     // if(i%100000==0){std::cout << "The current event number is " << i << " of " << NumberEntries << endl;}  
-    //     // //std::cout << "The current event number is " << i << " of " << NumberEntries << endl;            
-    //     // //std::cout << "secondly, Number of elements in the array: " << tStdHepN/*leng*/ << std::endl; 
-    //     int tStdHepPdg_nu, lepton_pdg_instore;
-    //     double fAbsoluteParticleMomentum_nu,fKE_nu,fAbsoluteParticleMomentum_lept,fKE_lept;
-
-
-    //     for (int j=0;j<tStdHepN;j++){
-
-    //         if(tStdHepStatus[j] == 0 && (tStdHepPdg[j] == -16 || tStdHepPdg[j] == -14 || tStdHepPdg[j] == -12 || tStdHepPdg[j] == 12 || tStdHepPdg[j] == 14 || tStdHepPdg[j] == 16)){
-    //             tStdHepPdg_nu=tStdHepPdg[j];
-    //             auto [fAbsoluteParticleMomentum, fKE] = kinematics_massless(tStdHepP4, j);
-    //             fAbsoluteParticleMomentum_nu=fAbsoluteParticleMomentum;
-    //             fKE_nu=fKE;
-
-    //         }
-
-    //         if (tStdHepStatus[j] == 1){
-    //             if (tStdHepPdg[j] == 11 || tStdHepPdg[j] == -11 || tStdHepPdg[j] == 12 || tStdHepPdg[j] == -12 || tStdHepPdg[j] == 13 || tStdHepPdg[j] == -13 || tStdHepPdg[j] == 14 || tStdHepPdg[j] == -14 || tStdHepPdg[j] == 15 || tStdHepPdg[j] == -15 || tStdHepPdg[j] == 16 || tStdHepPdg[j] == -16){                
-    //                 lepton_pdg_instore=tStdHepPdg[j];
-    //                 auto [fAbsoluteParticleMomentum, fInvMass,fKE] = kinematics(tStdHepP4, j);
-    //                 fAbsoluteParticleMomentum_lept=fAbsoluteParticleMomentum;
-    //                 fKE_lept=fKE;
-    //                 if ((tStdHepPdg[j]==13 && fKE_lept>=muon_ke) || (tStdHepPdg[j]==-13 && fKE_lept>=muon_ke) || (tStdHepPdg[j]==11 && fKE_lept>=electron_ke) || (tStdHepPdg[j]==-11 && fKE_lept>=electron_ke)){
-    //                     visible_count++;
-    //                 }
-
-    //             }
-
-    //             if (tStdHepPdg[j] == 2212){
-    //                 auto [fAbsoluteParticleMomentum, fInvMass,fKE] = kinematics(tStdHepP4, j);
-    //                 if (fAbsoluteParticleMomentum<=0.){
-    //                     skip_event = true;
-    //                     break;
-    //                 }
-    //                 if (fKE>=prot_ke){
-    //                     visible_count++;
-    //                     n_prot++;
-    //                 }
-
-    //             }
-    //             if (tStdHepPdg[j]==211 || tStdHepPdg[j]==-211){
-    //                 auto [fAbsoluteParticleMomentum, fInvMass,fKE] = kinematics(tStdHepP4, j);
-    //                 // fAbsoluteParticleMomentum_pion=fAbsoluteParticleMomentum;
-    //                 if (fAbsoluteParticleMomentum<=0.){
-    //                     skip_event = true;
-    //                     break;
-    //                 }
-    //                 if (fKE>=pion_ke){
-    //                     visible_count++;
-    //                     n_pi++;
-
-    //                     if (tStdHepPdg[j]==211){
-    //                         n_piplus++;
-    //                     }
-    //                     else if (tStdHepPdg[j]==-211){
-    //                         n_piminus++;
-    //                     }
-    //                 }
-    //             }
-
-    //             if (tStdHepPdg[j]==111){
-    //                 visible_count++, n_pi++,n_pizero++;
-    //             }
-
-    //             if (tStdHepPdg[j]==321|| tStdHepPdg[j]==-321 || tStdHepPdg[j]==130 || tStdHepPdg[j]==310){
-    //                 auto [fAbsoluteParticleMomentum, fInvMass,fKE] = kinematics(tStdHepP4, j);
-    //                 if (fAbsoluteParticleMomentum<=0.){
-    //                     skip_event = true;
-    //                     break;
-    //                 }
-    //                 // fAbsoluteParticleMomentum_kaon=fAbsoluteParticleMomentum;
-    //                 if (fKE>=kaon_ke){
-    //                     visible_count++;
-
-    //                 }
-    //             }
-    //         }
-
-    //     }
-        
-    //     if (visible_count>max_num){
-    //         max_num=visible_count;   
-    //         //std::cout << "for i:" << i <<"  max num:"<<max_num<< endl;        
-    //     }
-
-    // }
-
-    //////////////START OF THE 2ND EVENT LOOP//////
+    //////////////START OF THE EVENT LOOP//////
     for(int i=0; i<Num_events; i++)
     {   //Initializing multiplicity variables
         SignalTree->GetEntry(i);
         
-        if ( abs( tStdHepPdg[0] - tStdHepPdg[4] ) > 1 ) continue;
+       if ( (tStdHepPdg[4]==22 && abs( tStdHepPdg[0] - tStdHepPdg[5] ) > 1) || (tStdHepPdg[4]!=22 && abs( tStdHepPdg[0] - tStdHepPdg[4] ) > 1) ) continue;
+
 
         int n_prot=0, n_piplus=0, n_piminus=0, n_pizero=0, n_pi=0, visible_count=0;
 
@@ -830,8 +559,6 @@ void ScalarLept_w0NC(const std::string& input_file) {
         
 
         if(i%100000==0){std::cout << "The current event number in the 2nd event loop is " << i << " of " << NumberEntries << endl;}  
-        // //std::cout << "The current event number is " << i << " of " << NumberEntries << endl;            
-        // //std::cout << "secondly, Number of elements in the array: " << tStdHepN/*leng*/ << std::endl; 
         int tStdHepPdg_nu, lepton_pdg_instore;
         double fAbsoluteParticleMomentum_nu,fKE_nu,fAbsoluteParticleMomentum_lept,fKE_lept;
 
@@ -847,7 +574,7 @@ void ScalarLept_w0NC(const std::string& input_file) {
             }
 
             if (tStdHepStatus[j] == 1){
-                if (tStdHepPdg[j] == 11 || tStdHepPdg[j] == -11 || tStdHepPdg[j] == 12 || tStdHepPdg[j] == -12 || tStdHepPdg[j] == 13 || tStdHepPdg[j] == -13 || tStdHepPdg[j] == 14 || tStdHepPdg[j] == -14 || tStdHepPdg[j] == 15 || tStdHepPdg[j] == -15 || tStdHepPdg[j] == 16 || tStdHepPdg[j] == -16){                
+                if ((tStdHepPdg[j] == 11 || tStdHepPdg[j] == -11 || tStdHepPdg[j] == 12 || tStdHepPdg[j] == -12 || tStdHepPdg[j] == 13 || tStdHepPdg[j] == -13 || tStdHepPdg[j] == 14 || tStdHepPdg[j] == -14 || tStdHepPdg[j] == 15 || tStdHepPdg[j] == -15 || tStdHepPdg[j] == 16 || tStdHepPdg[j] == -16) && j<=5){                
                     lepton_pdg_instore=tStdHepPdg[j];
                     auto [fAbsoluteParticleMomentum, fInvMass,fKE] = kinematics(tStdHepP4, j);
                     fAbsoluteParticleMomentum_lept=fAbsoluteParticleMomentum;
@@ -872,7 +599,6 @@ void ScalarLept_w0NC(const std::string& input_file) {
                 }
                 if (tStdHepPdg[j]==211 || tStdHepPdg[j]==-211){
                     auto [fAbsoluteParticleMomentum, fInvMass,fKE] = kinematics(tStdHepP4, j);
-                    // fAbsoluteParticleMomentum_pion=fAbsoluteParticleMomentum;
                     if (fAbsoluteParticleMomentum<=0.){
                         skip_event = true;
                         break;
@@ -900,11 +626,22 @@ void ScalarLept_w0NC(const std::string& input_file) {
                         skip_event = true;
                         break;
                     }
-                    // fAbsoluteParticleMomentum_kaon=fAbsoluteParticleMomentum;
                     if (fKE>=kaon_ke){
                         visible_count++;
 
                     }
+                }
+
+                if tStdHepPdg[j]==22 {
+                    auto [fAbsoluteParticleMomentum_gamma, fKE_gamma] = kinematics_massless(tStdHepP4, j);
+                    if (fAbsoluteParticleMomentum_gamma<=0.){
+                        skip_event = true;
+                        break;
+                    }
+                    if (fKE_gamma>=2*electron_ke){
+                        visible_count++;
+
+                    } 
                 }
             }
 
@@ -976,12 +713,6 @@ void ScalarLept_w0NC(const std::string& input_file) {
                     //outfile << "\"" << i << "\",";                  
                     outfile << "\"" << i << "\"," << std::setprecision(6)  << "\"" << tStdHepPdg[j] << "\",\"" << fAbsoluteParticleMomentum << "\",\"" << tStdHepP4[4*j] << "\",\"" << tStdHepP4[4*j+1] << "\",\"" << tStdHepP4[4*j+2] << "\",\"" << tStdHepP4[4*j+1]/fAbsoluteParticleMomentum << "\",\"" << (180./PI)*acos(tStdHepP4[4*j+1]/fAbsoluteParticleMomentum) << "\",\"" << phi << "\",\""<< baseline << "\",\"";
 
-                    // Output the results
-                    // //std::cout << "i AM HEre for i:"<<i<<"and j:"<< j << std::endl;
-
-                    // //std::cout << "Absolute Particle Momentum: " << fAbsoluteParticleMomentum << std::endl;
-                    // // //std::cout << "Invariant Mass: " << fInvMass << std::endl;
-                    // //std::cout << "Kinetic Energy: " << fKE << std::endl;
                     
                 }
 
@@ -991,9 +722,9 @@ void ScalarLept_w0NC(const std::string& input_file) {
                     
                    auto [fAbsoluteParticleMomentum, fInvMass,fKE] = kinematics(tStdHepP4, j);
 
-                    if ((tStdHepPdg[j] == 13 || tStdHepPdg[j] == -13) && fKE >= muon_ke || 
+                    if (((tStdHepPdg[j] == 13 || tStdHepPdg[j] == -13) && fKE >= muon_ke || 
                         (tStdHepPdg[j] == 11 || tStdHepPdg[j] == -11) && fKE >= electron_ke||
-                        (tStdHepPdg[j] == 15 || tStdHepPdg[j] == -15)) 
+                        (tStdHepPdg[j] == 15 || tStdHepPdg[j] == -15)) && j<=5)
                     {
                         
                         outfile << std::setprecision(6) << tStdHepPdg[j] << "\",\"" << fInvMass << "\",\"" <<fKE << "\",\"" << tStdHepP4[4*j] << "\",\"" << tStdHepP4[4*j+1] << "\",\"" << tStdHepP4[4*j+2] << "\",\"" << tStdHepP4[4*j+1]/fAbsoluteParticleMomentum << "\",\"" << (180./PI)*acos(tStdHepP4[4*j+1]/fAbsoluteParticleMomentum) << "\",\"";
@@ -1008,21 +739,20 @@ void ScalarLept_w0NC(const std::string& input_file) {
                         Fin_CC_Lept_Theta->Fill(acos(tStdHepP4[4 * j + 1] / fAbsoluteParticleMomentum));
                     }
                     
-                    else if((tStdHepPdg[j] == 13 || tStdHepPdg[j] == -13) && fKE < muon_ke || 
-                        (tStdHepPdg[j] == 11 || tStdHepPdg[j] == -11) && fKE < electron_ke)
+                    else if(((tStdHepPdg[j] == 13 || tStdHepPdg[j] == -13) && fKE < muon_ke || 
+                        (tStdHepPdg[j] == 11 || tStdHepPdg[j] == -11) && fKE < electron_ke) && j<=5)
                     {    
                         outfile << 0 << "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0<< "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0<< "\",\"";
                     }
 
 
-                    else if(tStdHepPdg[j] == 12 || tStdHepPdg[j] == 14 || tStdHepPdg[j] == 16 || tStdHepPdg[j] == -12 || tStdHepPdg[j] == -14 || tStdHepPdg[j] == -16)
+                    else if((tStdHepPdg[j] == 12 || tStdHepPdg[j] == 14 || tStdHepPdg[j] == 16 || tStdHepPdg[j] == -12 || tStdHepPdg[j] == -14 || tStdHepPdg[j] == -16)&& j<=5)
                     {
                         outfile << 0 << "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0<< "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0<< "\",\"";
                     }
 
 
-
-                    if (tStdHepPdg[j] == 2212 || tStdHepPdg[j] == 211 || tStdHepPdg[j] == -211 || tStdHepPdg[j] == 111 || tStdHepPdg[j] == 321 || tStdHepPdg[j] == -321 || tStdHepPdg[j] == 130 || tStdHepPdg[j] == 310)
+                    else if (tStdHepPdg[j] == 2212 || tStdHepPdg[j] == 211 || tStdHepPdg[j] == -211 || tStdHepPdg[j] == 111 || tStdHepPdg[j] == 321 || tStdHepPdg[j] == -321 || tStdHepPdg[j] == 130 || tStdHepPdg[j] == 310 || tStdHepPdg[j] == 22||tStdHepPdg[j] == 11||tStdHepPdg[j] == -11||tStdHepPdg[j] == 13||tStdHepPdg[j] == -13)
                     {                       
                         finalparticles_info(tStdHepP4,j,tStdHepPdg,pdgs,masses,
                         energies, pxs, pys, pzs,costheta_arr,theta_arr, tot_fKE, tot_fpx, tot_fpy, tot_fpz,dictionary);
@@ -1123,9 +853,9 @@ void ScalarLept_w0NC(const std::string& input_file) {
                 if(tStdHepStatus[j] == 1){
                     auto [fAbsoluteParticleMomentum, fInvMass,fKE] = kinematics(tStdHepP4, j);
 
-                    if ((tStdHepPdg[j] == 13 || tStdHepPdg[j] == -13) && fKE >= muon_ke || 
+                    if (((tStdHepPdg[j] == 13 || tStdHepPdg[j] == -13) && fKE >= muon_ke || 
                         (tStdHepPdg[j] == 11 || tStdHepPdg[j] == -11) && fKE >= electron_ke||
-                        (tStdHepPdg[j] == 15 || tStdHepPdg[j] == -15)) 
+                        (tStdHepPdg[j] == 15 || tStdHepPdg[j] == -15)) && j<=5) 
                     {
                         
                         outfile << std::setprecision(6) << tStdHepPdg[j] << "\",\"" << fInvMass << "\",\"" <<fKE << "\",\"" << tStdHepP4[4*j] << "\",\"" << tStdHepP4[4*j+1] << "\",\"" << tStdHepP4[4*j+2] << "\",\"" << tStdHepP4[4*j+1]/fAbsoluteParticleMomentum << "\",\"" << (180./PI)*acos(tStdHepP4[4*j+1]/fAbsoluteParticleMomentum) << "\",\"";
@@ -1140,20 +870,20 @@ void ScalarLept_w0NC(const std::string& input_file) {
                         Fin_CC_Lept_Theta->Fill(acos(tStdHepP4[4 * j + 1] / fAbsoluteParticleMomentum));
                     }
                     
-                    else if((tStdHepPdg[j] == 13 || tStdHepPdg[j] == -13) && fKE < muon_ke || 
-                        (tStdHepPdg[j] == 11 || tStdHepPdg[j] == -11) && fKE < electron_ke)
+                    else if(((tStdHepPdg[j] == 13 || tStdHepPdg[j] == -13) && fKE < muon_ke || 
+                        (tStdHepPdg[j] == 11 || tStdHepPdg[j] == -11) && fKE < electron_ke) && j<=5)
                     {    
                         outfile << 0 << "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0<< "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0<< "\",\"";
                     }
 
 
-                    else if(tStdHepPdg[j] == 12 || tStdHepPdg[j] == 14 || tStdHepPdg[j] == 16 || tStdHepPdg[j] == -12 || tStdHepPdg[j] == -14 || tStdHepPdg[j] == -16)
+                    else if((tStdHepPdg[j] == 12 || tStdHepPdg[j] == 14 || tStdHepPdg[j] == 16 || tStdHepPdg[j] == -12 || tStdHepPdg[j] == -14 || tStdHepPdg[j] == -16) && j<=5)
                     {
                         outfile << 0 << "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0<< "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0<< "\",\"";
                     }
                     
 
-                    else if (tStdHepPdg[j] == 2212 || tStdHepPdg[j] == 211 || tStdHepPdg[j] == -211 || tStdHepPdg[j] == 111 || tStdHepPdg[j] == 321 || tStdHepPdg[j] == -321 || tStdHepPdg[j] == 130 || tStdHepPdg[j] == 310)
+                    else if (tStdHepPdg[j] == 2212 || tStdHepPdg[j] == 211 || tStdHepPdg[j] == -211 || tStdHepPdg[j] == 111 || tStdHepPdg[j] == 321 || tStdHepPdg[j] == -321 || tStdHepPdg[j] == 130 || tStdHepPdg[j] == 310 || tStdHepPdg[j] == 22||tStdHepPdg[j] == 11||tStdHepPdg[j] == -11||tStdHepPdg[j] == 13||tStdHepPdg[j] == -13)
                     {                    
                         finalparticles_info(tStdHepP4,j,tStdHepPdg,pdgs,masses,
                         energies, pxs, pys, pzs,costheta_arr,theta_arr, tot_fKE, tot_fpx, tot_fpy, tot_fpz,dictionary);
@@ -1252,9 +982,9 @@ void ScalarLept_w0NC(const std::string& input_file) {
                 if(tStdHepStatus[j] == 1){
                     auto [fAbsoluteParticleMomentum, fInvMass,fKE] = kinematics(tStdHepP4, j);
                     //Charged current cases
-                    if ((tStdHepPdg[j] == 13 || tStdHepPdg[j] == -13) && fKE >= muon_ke || 
+                    if (((tStdHepPdg[j] == 13 || tStdHepPdg[j] == -13) && fKE >= muon_ke || 
                         (tStdHepPdg[j] == 11 || tStdHepPdg[j] == -11) && fKE >= electron_ke||
-                        (tStdHepPdg[j] == 15 || tStdHepPdg[j] == -15)) 
+                        (tStdHepPdg[j] == 15 || tStdHepPdg[j] == -15)) && j<=5)
                     {
                         
                         outfile << std::setprecision(6) << tStdHepPdg[j] << "\",\"" << fInvMass << "\",\"" <<fKE << "\",\"" << tStdHepP4[4*j] << "\",\"" << tStdHepP4[4*j+1] << "\",\"" << tStdHepP4[4*j+2] << "\",\"" << tStdHepP4[4*j+1]/fAbsoluteParticleMomentum << "\",\"" << (180./PI)*acos(tStdHepP4[4*j+1]/fAbsoluteParticleMomentum) << "\",\"";
@@ -1269,15 +999,16 @@ void ScalarLept_w0NC(const std::string& input_file) {
                         Fin_CC_Lept_Theta->Fill(acos(tStdHepP4[4 * j + 1] / fAbsoluteParticleMomentum));
                     }
                     
-                    else if((tStdHepPdg[j] == 13 || tStdHepPdg[j] == -13) && fKE < muon_ke || 
-                        (tStdHepPdg[j] == 11 || tStdHepPdg[j] == -11) && fKE < electron_ke)
+                    else if(((tStdHepPdg[j] == 13 || tStdHepPdg[j] == -13) && fKE < muon_ke || 
+                        (tStdHepPdg[j] == 11 || tStdHepPdg[j] == -11) && fKE < electron_ke) && j<=5)
                     {    
                         outfile << 0 << "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0<< "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0<< "\",\"";
                     }
 
                     
 
-                    else if (tStdHepPdg[j] == 2212 || tStdHepPdg[j] == 211 || tStdHepPdg[j] == -211 || tStdHepPdg[j] == 111 || tStdHepPdg[j] == 321 || tStdHepPdg[j] == -321 || tStdHepPdg[j] == 130 || tStdHepPdg[j] == 310){              
+                    else if (tStdHepPdg[j] == 2212 || tStdHepPdg[j] == 211 || tStdHepPdg[j] == -211 || tStdHepPdg[j] == 111 || tStdHepPdg[j] == 321 || tStdHepPdg[j] == -321 || tStdHepPdg[j] == 130 || tStdHepPdg[j] == 310 || tStdHepPdg[j] == 22||tStdHepPdg[j] == 11||tStdHepPdg[j] == -11||tStdHepPdg[j] == 13||tStdHepPdg[j] == -13)
+                    {              
                         finalparticles_info(tStdHepP4,j,tStdHepPdg,pdgs,masses,
                         energies, pxs, pys, pzs,costheta_arr,theta_arr, tot_fKE, tot_fpx, tot_fpy, tot_fpz,dictionary);
                     }
@@ -1368,14 +1099,14 @@ void ScalarLept_w0NC(const std::string& input_file) {
 
                 if(tStdHepStatus[j] == 1){                    
                                         
-                    if(tStdHepPdg[j] == 12 || tStdHepPdg[j] == 14 || tStdHepPdg[j] == 16 || tStdHepPdg[j] == -12 || tStdHepPdg[j] == -14 || tStdHepPdg[j] == -16)
+                    if((tStdHepPdg[j] == 12 || tStdHepPdg[j] == 14 || tStdHepPdg[j] == 16 || tStdHepPdg[j] == -12 || tStdHepPdg[j] == -14 || tStdHepPdg[j] == -16)&& j<=5)
                     {
                         outfile << 0 << "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0<< "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0<< "\",\"";
                     }
 
                     
 
-                    else if (tStdHepPdg[j] == 2212 || tStdHepPdg[j] == 211 || tStdHepPdg[j] == -211 || tStdHepPdg[j] == 111 || tStdHepPdg[j] == 321 || tStdHepPdg[j] == -321 || tStdHepPdg[j] == 130 || tStdHepPdg[j] == 310)
+                    else if (tStdHepPdg[j] == 2212 || tStdHepPdg[j] == 211 || tStdHepPdg[j] == -211 || tStdHepPdg[j] == 111 || tStdHepPdg[j] == 321 || tStdHepPdg[j] == -321 || tStdHepPdg[j] == 130 || tStdHepPdg[j] == 310 || tStdHepPdg[j] == 22||tStdHepPdg[j] == 11||tStdHepPdg[j] == -11||tStdHepPdg[j] == 13||tStdHepPdg[j] == -13)
                     {                    
                         finalparticles_info(tStdHepP4,j,tStdHepPdg,pdgs,masses,
                         energies, pxs, pys, pzs,costheta_arr,theta_arr, tot_fKE, tot_fpx, tot_fpy, tot_fpz,dictionary);
@@ -1475,9 +1206,9 @@ void ScalarLept_w0NC(const std::string& input_file) {
                     auto [fAbsoluteParticleMomentum, fInvMass,fKE] = kinematics(tStdHepP4, j);
 
                     //Charged current cases
-                    if ((tStdHepPdg[j] == 13 || tStdHepPdg[j] == -13) && fKE >= muon_ke || 
+                    if (((tStdHepPdg[j] == 13 || tStdHepPdg[j] == -13) && fKE >= muon_ke || 
                         (tStdHepPdg[j] == 11 || tStdHepPdg[j] == -11) && fKE >= electron_ke||
-                        (tStdHepPdg[j] == 15 || tStdHepPdg[j] == -15)) 
+                        (tStdHepPdg[j] == 15 || tStdHepPdg[j] == -15)) && j<=5)
                     {
                         
                         outfile << std::setprecision(6) << tStdHepPdg[j] << "\",\"" << fInvMass << "\",\"" <<fKE << "\",\"" << tStdHepP4[4*j] << "\",\"" << tStdHepP4[4*j+1] << "\",\"" << tStdHepP4[4*j+2] << "\",\"" << tStdHepP4[4*j+1]/fAbsoluteParticleMomentum << "\",\"" << (180./PI)*acos(tStdHepP4[4*j+1]/fAbsoluteParticleMomentum) << "\",\"";
@@ -1492,13 +1223,13 @@ void ScalarLept_w0NC(const std::string& input_file) {
                         Fin_CC_Lept_Theta->Fill(acos(tStdHepP4[4 * j + 1] / fAbsoluteParticleMomentum));
                     }
                     
-                    else if((tStdHepPdg[j] == 13 || tStdHepPdg[j] == -13) && fKE < muon_ke || 
-                        (tStdHepPdg[j] == 11 || tStdHepPdg[j] == -11) && fKE < electron_ke)
+                    else if(((tStdHepPdg[j] == 13 || tStdHepPdg[j] == -13) && fKE < muon_ke || 
+                        (tStdHepPdg[j] == 11 || tStdHepPdg[j] == -11) && fKE < electron_ke) && j<=5)
                     {    
                         outfile << 0 << "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0<< "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0<< "\",\"";
                     }
 
-                    else if (tStdHepPdg[j] == 2212 || tStdHepPdg[j] == 211 || tStdHepPdg[j] == -211 || tStdHepPdg[j] == 111 || tStdHepPdg[j] == 321 || tStdHepPdg[j] == -321 || tStdHepPdg[j] == 130 || tStdHepPdg[j] == 310)
+                    else if (tStdHepPdg[j] == 2212 || tStdHepPdg[j] == 211 || tStdHepPdg[j] == -211 || tStdHepPdg[j] == 111 || tStdHepPdg[j] == 321 || tStdHepPdg[j] == -321 || tStdHepPdg[j] == 130 || tStdHepPdg[j] == 310 || tStdHepPdg[j] == 22||tStdHepPdg[j] == 11||tStdHepPdg[j] == -11||tStdHepPdg[j] == 13||tStdHepPdg[j] == -13)
                     {
                         finalparticles_info(tStdHepP4,j,tStdHepPdg,pdgs,masses,
                         energies, pxs, pys, pzs,costheta_arr,theta_arr, tot_fKE, tot_fpx, tot_fpy, tot_fpz,dictionary);
@@ -1591,13 +1322,13 @@ void ScalarLept_w0NC(const std::string& input_file) {
 
                 if(tStdHepStatus[j] == 1){                    
 
-                   if(tStdHepPdg[j] == 12 || tStdHepPdg[j] == 14 || tStdHepPdg[j] == 16 || tStdHepPdg[j] == -12 || tStdHepPdg[j] == -14 || tStdHepPdg[j] == -16)
+                   if((tStdHepPdg[j] == 12 || tStdHepPdg[j] == 14 || tStdHepPdg[j] == 16 || tStdHepPdg[j] == -12 || tStdHepPdg[j] == -14 || tStdHepPdg[j] == -16) && j<=5)
                     {
                         outfile << 0 << "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0<< "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0<< "\",\"";
                     }
                 
 
-                    else if (tStdHepPdg[j] == 2212 || tStdHepPdg[j] == 211 || tStdHepPdg[j] == -211 || tStdHepPdg[j] == 111 || tStdHepPdg[j] == 321 || tStdHepPdg[j] == -321 || tStdHepPdg[j] == 130 || tStdHepPdg[j] == 310)
+                    else if (tStdHepPdg[j] == 2212 || tStdHepPdg[j] == 211 || tStdHepPdg[j] == -211 || tStdHepPdg[j] == 111 || tStdHepPdg[j] == 321 || tStdHepPdg[j] == -321 || tStdHepPdg[j] == 130 || tStdHepPdg[j] == 310 || tStdHepPdg[j] == 22||tStdHepPdg[j] == 11||tStdHepPdg[j] == -11||tStdHepPdg[j] == 13||tStdHepPdg[j] == -13)
                     {                    
                         finalparticles_info(tStdHepP4,j,tStdHepPdg,pdgs,masses,
                         energies, pxs, pys, pzs,costheta_arr,theta_arr, tot_fKE, tot_fpx, tot_fpy, tot_fpz,dictionary);
@@ -1688,9 +1419,9 @@ void ScalarLept_w0NC(const std::string& input_file) {
                 if(tStdHepStatus[j] == 1){
                     //Charged current cases
                     auto [fAbsoluteParticleMomentum, fInvMass,fKE] = kinematics(tStdHepP4, j);
-                    if ((tStdHepPdg[j] == 13 || tStdHepPdg[j] == -13) && fKE >= muon_ke || 
+                    if (((tStdHepPdg[j] == 13 || tStdHepPdg[j] == -13) && fKE >= muon_ke || 
                         (tStdHepPdg[j] == 11 || tStdHepPdg[j] == -11) && fKE >= electron_ke||
-                        (tStdHepPdg[j] == 15 || tStdHepPdg[j] == -15)) 
+                        (tStdHepPdg[j] == 15 || tStdHepPdg[j] == -15)) && j<=5)
                     {
                         
                         outfile << std::setprecision(6) << tStdHepPdg[j] << "\",\"" << fInvMass << "\",\"" <<fKE << "\",\"" << tStdHepP4[4*j] << "\",\"" << tStdHepP4[4*j+1] << "\",\"" << tStdHepP4[4*j+2] << "\",\"" << tStdHepP4[4*j+1]/fAbsoluteParticleMomentum << "\",\"" << (180./PI)*acos(tStdHepP4[4*j+1]/fAbsoluteParticleMomentum) << "\",\"";
@@ -1705,19 +1436,19 @@ void ScalarLept_w0NC(const std::string& input_file) {
                         Fin_CC_Lept_Theta->Fill(acos(tStdHepP4[4 * j + 1] / fAbsoluteParticleMomentum));
                     }
                     
-                    else if((tStdHepPdg[j] == 13 || tStdHepPdg[j] == -13) && fKE < muon_ke || 
-                        (tStdHepPdg[j] == 11 || tStdHepPdg[j] == -11) && fKE < electron_ke)
+                    else if(((tStdHepPdg[j] == 13 || tStdHepPdg[j] == -13) && fKE < muon_ke || 
+                        (tStdHepPdg[j] == 11 || tStdHepPdg[j] == -11) && fKE < electron_ke) && j<=5)
                     {    
                         outfile << 0 << "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0<< "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0<< "\",\"";
                     }
 
 
-                    else if(tStdHepPdg[j] == 12 || tStdHepPdg[j] == 14 || tStdHepPdg[j] == 16 || tStdHepPdg[j] == -12 || tStdHepPdg[j] == -14 || tStdHepPdg[j] == -16)
+                    else if((tStdHepPdg[j] == 12 || tStdHepPdg[j] == 14 || tStdHepPdg[j] == 16 || tStdHepPdg[j] == -12 || tStdHepPdg[j] == -14 || tStdHepPdg[j] == -16) && j<=5)
                     {
                         outfile << 0 << "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0<< "\",\"" << 0 << "\",\"" << 0 << "\",\"" << 0<< "\",\"";
                     }
 
-                    else if (tStdHepPdg[j] == 2212 || tStdHepPdg[j] == 211 || tStdHepPdg[j] == -211 || tStdHepPdg[j] == 111 || tStdHepPdg[j] == 321 || tStdHepPdg[j] == -321 || tStdHepPdg[j] == 130 || tStdHepPdg[j] == 310)
+                     else if (tStdHepPdg[j] == 2212 || tStdHepPdg[j] == 211 || tStdHepPdg[j] == -211 || tStdHepPdg[j] == 111 || tStdHepPdg[j] == 321 || tStdHepPdg[j] == -321 || tStdHepPdg[j] == 130 || tStdHepPdg[j] == 310 || tStdHepPdg[j] == 22||tStdHepPdg[j] == 11||tStdHepPdg[j] == -11||tStdHepPdg[j] == 13||tStdHepPdg[j] == -13)
                     {
                         finalparticles_info(tStdHepP4,j,tStdHepPdg,pdgs,masses,
                         energies, pxs, pys, pzs,costheta_arr,theta_arr, tot_fKE, tot_fpx, tot_fpy, tot_fpz,dictionary);
@@ -1807,6 +1538,7 @@ void ScalarLept_w0NC(const std::string& input_file) {
     Fin_PiPlus_Mom->Write();
     Fin_PiMinus_Mom->Write();
     Fin_PiZero_Mom->Write();
+    Fin_Gamma_Mom->Write();
     
 
     //std::cout << "Initial Neutrino Momentum, hA 2018" << endl;
@@ -1929,6 +1661,12 @@ void ScalarLept_w0NC(const std::string& input_file) {
     c1->Print((directory + "/" + last_name + "Fin_PiZero_Mult.png").c_str());
     c1->Print((directory + "/" + last_name + "Fin_PiZero_Mult.root").c_str());
     c1->Clear();
+    
+    Fin_Gamma_Mom->Draw("hist");
+    c1->BuildLegend(0.5,0.3,0.9,0.7);
+    c1->SetLogy(1);
+    c1->Print((directory + "/" + last_name + "Fin_Gamma_Mom.png").c_str());
+    c1->Print((directory + "/" + last_name + "Fin_Gamma_Mom.root").c_str()); c1->Clear();
 
     treefile->Write();
     c1->Close();
