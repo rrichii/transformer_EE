@@ -180,11 +180,12 @@ double getDoubleValue(const std::variant<int, float, std::string>& value) {
     } 
     throw std::runtime_error("Unsupported type for conversion to double");
 }
-std::tuple<double, double> kinematics_massless(const double tStdHepP4[], int j) {
+std::tuple<double, double, double> kinematics_massless(const double tStdHepP4[], int j) {
     double fAbsoluteParticleMomentum = sqrt(pow(tStdHepP4[4 * j], 2) + pow(tStdHepP4[4 * j + 1], 2) + pow(tStdHepP4[4 * j + 2], 2));
     double fKE = fAbsoluteParticleMomentum;
+    double fInvMass=0
 
-    return std::make_tuple(fAbsoluteParticleMomentum, fKE);
+    return std::make_tuple(fAbsoluteParticleMomentum,fInvMass, fKE);
 }
 
 double calc_baseline(const double tStdHepP4[],double fAbsoluteParticleMomentum,int j){
@@ -210,7 +211,7 @@ void lepton_kinematics(const double tStdHepP4[],int j,const int tStdHepPdg[],std
                     const std::map<std::string, std::variant<int,float, std::string>>& dictionary){
     
     auto [fAbsoluteParticleMomentum, fInvMass,fKE] = kinematics(tStdHepP4, j);
-    
+    auto [fAbsoluteParticleMomentum_gamma,fInvMass_gamma, fKE_gamma] = kinematics_massless(tStdHepP4, j);
 
     double muon_ke=getDoubleValue(dictionary.at("Muon_KE"));
     double electron_ke=getDoubleValue(dictionary.at("Electron_KE"));
@@ -242,6 +243,24 @@ void lepton_kinematics(const double tStdHepP4[],int j,const int tStdHepPdg[],std
         Fin_CC_Lept_CosTheta->Fill(tStdHepP4[4 * j + 1] / fAbsoluteParticleMomentum);
         Fin_CC_Lept_Theta->Fill(acos(tStdHepP4[4 * j + 1] / fAbsoluteParticleMomentum));
     }
+
+    if  (tStdHepPdg[j] == 22 && fKE_gamma>=2*electron_ke){
+        pdgs.push_back(tStdHepPdg[j]);
+        masses.push_back(fInvMass_gamma);
+        energies.push_back(fKE_gamma);
+        pxs.push_back(tStdHepP4[4 * j]);
+        pys.push_back(tStdHepP4[4 * j + 1]);
+        pzs.push_back(tStdHepP4[4 * j + 2]);        
+        costheta_arr.push_back(tStdHepP4[4*j+1]/fAbsoluteParticleMomentum_gamma);
+        theta_arr.push_back((180./PI)*acos(tStdHepP4[4*j+1]/fAbsoluteParticleMomentum_gamma));
+
+        tot_fKE += fKE_gamma;
+        tot_fpx += tStdHepP4[4 * j];
+        tot_fpy += tStdHepP4[4 * j + 1];
+        tot_fpz += tStdHepP4[4 * j + 2];
+        Fin_Gamma_Mom->Fill(1000.*fAbsoluteParticleMomentum_gamma);
+    }
+    
 }
 
 void NC_lepton_kinematics(const double tStdHepP4[],int j,const int tStdHepPdg[],std::vector<int>& pdgs, std::vector<double>& masses,
@@ -249,7 +268,7 @@ void NC_lepton_kinematics(const double tStdHepP4[],int j,const int tStdHepPdg[],
                     std::vector<double>& pys, std::vector<double>& pzs,std::vector<double>& costheta_arr,std::vector<double>& theta_arr,double& tot_fKE, double& tot_fpx, double& tot_fpy, double& tot_fpz,
                     const std::map<std::string, std::variant<int,float, std::string>>& dictionary){
     
-    auto [fAbsoluteParticleMomentum, fKE] = kinematics_massless(tStdHepP4, j);
+    auto [fAbsoluteParticleMomentum, fInvMass,fKE] = kinematics_massless(tStdHepP4, j);
     
         pdgs.push_back(tStdHepPdg[j]);
         masses.push_back(0);
@@ -277,7 +296,7 @@ void finalparticles_info(const double tStdHepP4[],int j,const int tStdHepPdg[],s
                     const std::map<std::string, std::variant<int,float, std::string>>& dictionary){
 
     auto [fAbsoluteParticleMomentum, fInvMass,fKE] = kinematics(tStdHepP4, j);
-    auto [fAbsoluteParticleMomentum_gamma, fKE_gamma] = kinematics_massless(tStdHepP4, j);
+    auto [fAbsoluteParticleMomentum_gamma, fInvMass_gamma, fKE_gamma] = kinematics_massless(tStdHepP4, j);
     //define costheta and theta array
 
     double prot_ke= getDoubleValue(dictionary.at("Proton_KE"));
@@ -290,7 +309,7 @@ void finalparticles_info(const double tStdHepP4[],int j,const int tStdHepPdg[],s
         (tStdHepPdg[j]==-211 && fKE>=pion_ke) ||
         (tStdHepPdg[j]==111) || 
         ((tStdHepPdg[j]== 321 || tStdHepPdg[j]== -321 || tStdHepPdg[j]== 130 || tStdHepPdg[j]== 310) && fKE>=kaon_ke)||      
-        (tStdHepPdg[j] == 22 && fKE_gamma>=2*electron_ke)){
+        ){
         
         
         pdgs.push_back(tStdHepPdg[j]);
@@ -310,9 +329,6 @@ void finalparticles_info(const double tStdHepP4[],int j,const int tStdHepPdg[],s
         if (tStdHepPdg[j]==2212){
             Fin_Prot_Mom->Fill(1000.*fAbsoluteParticleMomentum);
         }
-        if (tStdHepPdg[j]==22){
-             Fin_Gamma_Mom->Fill(1000.*fAbsoluteParticleMomentum_gamma);
-        }
         if (tStdHepPdg[j]==211){
             Fin_PiPlus_Mom->Fill(1000.*fAbsoluteParticleMomentum);
         }
@@ -324,6 +340,23 @@ void finalparticles_info(const double tStdHepP4[],int j,const int tStdHepPdg[],s
         if (tStdHepPdg[j]==111){
             Fin_PiZero_Mom->Fill(1000.*fAbsoluteParticleMomentum);
         }
+
+        if  (tStdHepPdg[j] == 22 && fKE_gamma>=2*electron_ke){
+        pdgs.push_back(tStdHepPdg[j]);
+        masses.push_back(fInvMass_gamma);
+        energies.push_back(fKE_gamma);
+        pxs.push_back(tStdHepP4[4 * j]);
+        pys.push_back(tStdHepP4[4 * j + 1]);
+        pzs.push_back(tStdHepP4[4 * j + 2]);        
+        costheta_arr.push_back(tStdHepP4[4*j+1]/fAbsoluteParticleMomentum_gamma);
+        theta_arr.push_back((180./PI)*acos(tStdHepP4[4*j+1]/fAbsoluteParticleMomentum_gamma));
+
+        tot_fKE += fKE_gamma;
+        tot_fpx += tStdHepP4[4 * j];
+        tot_fpy += tStdHepP4[4 * j + 1];
+        tot_fpz += tStdHepP4[4 * j + 2];
+        Fin_Gamma_Mom->Fill(1000.*fAbsoluteParticleMomentum_gamma);
+    }
     }
     
 }
@@ -647,9 +680,9 @@ void VectorLept_wNC(const std::string& input_file) {
 
             if(tStdHepStatus[j] == 0 && (tStdHepPdg[j] == -16 || tStdHepPdg[j] == -14 || tStdHepPdg[j] == -12 || tStdHepPdg[j] == 12 || tStdHepPdg[j] == 14 || tStdHepPdg[j] == 16)){
                 tStdHepPdg_nu=tStdHepPdg[j];
-                auto [fAbsoluteParticleMomentum, fKE] = kinematics_massless(tStdHepP4, j);
-                fAbsoluteParticleMomentum_nu=fAbsoluteParticleMomentum;
-                fKE_nu=fKE;
+                auto [fAbsoluteParticleMomentum_gamma, fInvMass,fKE_gamma] = kinematics_massless(tStdHepP4, j);
+                fAbsoluteParticleMomentum_nu=fAbsoluteParticleMomentum_gamma;
+                fKE_nu=fKE_gamma;
 
             }
 
@@ -713,8 +746,8 @@ void VectorLept_wNC(const std::string& input_file) {
 
                     }
                 }
-                if tStdHepPdg[j]==22 {
-                    auto [fAbsoluteParticleMomentum_gamma, fKE_gamma] = kinematics_massless(tStdHepP4, j);
+                if tStdHepPdg[j] == 22 {
+                    auto [fAbsoluteParticleMomentum_gamma, fInvMass_gamma,fKE_gamma] = kinematics_massless(tStdHepP4, j);
                     if (fAbsoluteParticleMomentum_gamma<=0.){
                         skip_event = true;
                         break;
@@ -769,7 +802,7 @@ void VectorLept_wNC(const std::string& input_file) {
             
                 if(tStdHepStatus[j] == 0 && (tStdHepPdg[j] == -16 || tStdHepPdg[j] == -14 || tStdHepPdg[j] == -12 || tStdHepPdg[j] == 12 || tStdHepPdg[j] == 14 || tStdHepPdg[j] == 16)){
                         
-                    auto [fAbsoluteParticleMomentum, fKE] = kinematics_massless(tStdHepP4, j);
+                    auto [fAbsoluteParticleMomentum, fInvMass,fKE] = kinematics_massless(tStdHepP4, j);
 
                     double baseline= calc_baseline(tStdHepP4, fAbsoluteParticleMomentum, j);
                     double phi=phi_nu(tStdHepP4,fAbsoluteParticleMomentum, j);
@@ -877,7 +910,7 @@ void VectorLept_wNC(const std::string& input_file) {
             
                 if(tStdHepStatus[j] == 0 && (tStdHepPdg[j] == -16 || tStdHepPdg[j] == -14 || tStdHepPdg[j] == -12 || tStdHepPdg[j] == 12 || tStdHepPdg[j] == 14 || tStdHepPdg[j] == 16)){
                         
-                    auto [fAbsoluteParticleMomentum, fKE] = kinematics_massless(tStdHepP4, j);
+                    auto [fAbsoluteParticleMomentum, fInvMass,fKE] = kinematics_massless(tStdHepP4, j);
                     double baseline= calc_baseline(tStdHepP4, fAbsoluteParticleMomentum, j);
                     double phi=phi_nu(tStdHepP4,fAbsoluteParticleMomentum, j);
 
@@ -982,7 +1015,7 @@ void VectorLept_wNC(const std::string& input_file) {
             
                 if(tStdHepStatus[j] == 0 && (tStdHepPdg[j] == -16 || tStdHepPdg[j] == -14 || tStdHepPdg[j] == -12 || tStdHepPdg[j] == 12 || tStdHepPdg[j] == 14 || tStdHepPdg[j] == 16)){
                         
-                    auto [fAbsoluteParticleMomentum, fKE] = kinematics_massless(tStdHepP4, j);
+                    auto [fAbsoluteParticleMomentum, fInvMass,fKE] = kinematics_massless(tStdHepP4, j);
                     
                     double baseline= calc_baseline(tStdHepP4, fAbsoluteParticleMomentum, j);
                     double phi=phi_nu(tStdHepP4,fAbsoluteParticleMomentum, j);
@@ -1082,7 +1115,7 @@ void VectorLept_wNC(const std::string& input_file) {
             
                 if(tStdHepStatus[j] == 0 && (tStdHepPdg[j] == -16 || tStdHepPdg[j] == -14 || tStdHepPdg[j] == -12 || tStdHepPdg[j] == 12 || tStdHepPdg[j] == 14 || tStdHepPdg[j] == 16)){
                         
-                    auto [fAbsoluteParticleMomentum, fKE] = kinematics_massless(tStdHepP4, j);
+                    auto [fAbsoluteParticleMomentum, fInvMass,fKE] = kinematics_massless(tStdHepP4, j);
                     double baseline= calc_baseline(tStdHepP4, fAbsoluteParticleMomentum, j);
                     double phi=phi_nu(tStdHepP4,fAbsoluteParticleMomentum, j);
 
@@ -1174,7 +1207,7 @@ void VectorLept_wNC(const std::string& input_file) {
                 
                 if(tStdHepStatus[j] == 0 && (tStdHepPdg[j] == -16 || tStdHepPdg[j] == -14 || tStdHepPdg[j] == -12 || tStdHepPdg[j] == 12 || tStdHepPdg[j] == 14 || tStdHepPdg[j] == 16)){
                         
-                    auto [fAbsoluteParticleMomentum, fKE] = kinematics_massless(tStdHepP4, j);
+                    auto [fAbsoluteParticleMomentum, fInvMass,fKE] = kinematics_massless(tStdHepP4, j);
                     double baseline= calc_baseline(tStdHepP4, fAbsoluteParticleMomentum, j);
                     double phi=phi_nu(tStdHepP4,fAbsoluteParticleMomentum, j);
 
@@ -1275,7 +1308,7 @@ void VectorLept_wNC(const std::string& input_file) {
             
                 if(tStdHepStatus[j] == 0 && (tStdHepPdg[j] == -16 || tStdHepPdg[j] == -14 || tStdHepPdg[j] == -12 || tStdHepPdg[j] == 12 || tStdHepPdg[j] == 14 || tStdHepPdg[j] == 16)){
                         
-                    auto [fAbsoluteParticleMomentum, fKE] = kinematics_massless(tStdHepP4, j);
+                    auto [fAbsoluteParticleMomentum, fInvMass,fKE] = kinematics_massless(tStdHepP4, j);
 
                     double baseline= calc_baseline(tStdHepP4, fAbsoluteParticleMomentum, j);
                     double phi=phi_nu(tStdHepP4,fAbsoluteParticleMomentum, j);
@@ -1368,7 +1401,7 @@ void VectorLept_wNC(const std::string& input_file) {
 
             
                 if(tStdHepStatus[j] == 0 && (tStdHepPdg[j] == -16 || tStdHepPdg[j] == -14 || tStdHepPdg[j] == -12 || tStdHepPdg[j] == 12 || tStdHepPdg[j] == 14 || tStdHepPdg[j] == 16)){
-                    auto [fAbsoluteParticleMomentum, fKE] = kinematics_massless(tStdHepP4, j);
+                    auto [fAbsoluteParticleMomentum, fInvMass,fKE] = kinematics_massless(tStdHepP4, j);
 
                     double baseline= calc_baseline(tStdHepP4, fAbsoluteParticleMomentum, j);
                     double phi=phi_nu(tStdHepP4,fAbsoluteParticleMomentum, j);
