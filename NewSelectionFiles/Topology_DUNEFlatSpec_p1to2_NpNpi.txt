@@ -1,0 +1,15 @@
+EventNum:All
+Initial_Nu_Energy_min:0.1
+Initial_Nu_Energy_max:2
+Initial_PDG:14
+Final_state_lepton_PDG_code_or_process:CC
+Proton_KE:0.025
+Pi+-_KE:0.07
+K+-_KE:0.03
+Muon_KE:0.005
+Electron_KE:0.005
+num_proton:N
+num_pion:N
+INPUT_ROOT_FILE:/exp/dune/data/users/jbarrow/MLProject/Training_Samples/Atmospherics_DUNE_Like/Flat_Spectra/numu_5M_AR23_0p1-20GeV_HondaAtmo_FlatE_FlatAngles_combined.gtrac.root
+OUTPUT_NAME:Numu_CC_Train_DUNEAtmo_Flat_p1to2_
+OUTPUT_DIR:/exp/dune/data/users/rrichi/MLProject/Training_Samples/Atmospherics_DUNE_Like/Flat_Spectra/Numu_CC_Train_DUNEAtmo_Flat_p1to2_
