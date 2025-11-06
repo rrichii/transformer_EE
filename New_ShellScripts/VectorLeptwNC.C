@@ -544,7 +544,7 @@ void VectorLept_wNC(const std::string &input_file)
     outfile << "\"Event_Index\",\"Nu_PDG\",\"Nu_Energy\",\"Nu_Mom_X\",\"Nu_Mom_Y\",\"Nu_Mom_Z\",\"Nu_CosTheta\",\"Nu_Theta\",\"Nu_Phi\",\"Nu_Baseline\",\"Final_State_Particles_PDG\",\"Final_State_Particles_Mass\",\"Final_State_Particles_Energy\",\"Final_State_Particles_Momentum_X\",\"Final_State_Particles_Momentum_Y\",\"Final_State_Particles_Momentum_Z\",\"Final_State_Particles_CosTheta\",\"Final_State_Particles_Theta\",\"tot_fKE\",\"p_tot\",\"P_miss\",\"Topology\"\n";
 
 
-    std::string last_name = output_name + num_events_str + proton_num_str + "p" + pion_num_str + "pi_";
+    std::string last_name = output_name + "VectorLeptwNC_eventnum_"+ num_events_str+ "_" + proton_num_str + "p" + pion_num_str + "pi_";
 
     gStyle->SetStatY(0.9);
     gStyle->SetStatX(0.9);
