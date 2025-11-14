@@ -529,7 +529,7 @@ void ScalarLept_wNC(const std::string &input_file)
      // directory here
 
     std::string output_directory = std::get<std::string>(dictionary["OUTPUT_DIR"]);
-    std::string directory = output_directory + "VectorLeptwNC_eventnum_" + num_events_str + "_" + proton_num_str + "p" + pion_num_str + "pi";
+    std::string directory = output_directory + "ScalarLeptwNC_eventnum_" + num_events_str + "_" + proton_num_str + "p" + pion_num_str + "pi";
 
     try
     {
@@ -547,15 +547,15 @@ void ScalarLept_wNC(const std::string &input_file)
         std::cerr << "An error occurred while creating the directory: " << e.what() << std::endl;
     }
 
-    std::string Output_Root_file = output_directory + "VectorLeptwNC_eventnum_" + num_events_str + "_" + proton_num_str + "p" + pion_num_str + "pi.root";
+    std::string Output_Root_file = output_directory + "ScalarLeptwNC_eventnum_" + num_events_str + "_" + proton_num_str + "p" + pion_num_str + "pi.root";
 
     TFile *treefile = new TFile(Output_Root_file.c_str(), "RECREATE");
 
     std::string output_name = std::get<std::string>(dictionary["OUTPUT_NAME"]);
-    std::string outfile_name = output_directory + "VectorLeptwNC_eventnum_" + num_events_str + "_" + proton_num_str + "p" + pion_num_str + "pi.csv";
+    std::string outfile_name = output_directory + "ScalarLeptwNC_eventnum_" + num_events_str + "_" + proton_num_str + "p" + pion_num_str + "pi.csv";
 
     ofstream outfile(outfile_name);
-    std::string last_name = output_name + "VectorLeptwNC_eventnum_"+ num_events_str+ "_" + proton_num_str + "p" + pion_num_str + "pi_";
+    std::string last_name = output_name + "ScalarLeptwNC_eventnum_"+ num_events_str+ "_" + proton_num_str + "p" + pion_num_str + "pi_";
 
     // define the header for the CSV file
     outfile << "\"Event_Index\",\"Nu_PDG\",\"Nu_Energy\",\"Nu_Mom_X\",\"Nu_Mom_Y\",\"Nu_Mom_Z\",\"Nu_CosTheta\",\"Nu_Theta\",\"Nu_Phi\",\"Nu_Theta_z\",\"Nu_Phi_z\",\"Nu_Baseline\",\"Lept_PDG\",\"Lept_Mass\",\"Lept_Energy\",\"Lept_MomX\",\"Lept_MomY\",\"Lept_MomZ\",\"Lept_CosTheta\",\"Lept_Theta\",\"Lept_Theta_z\",\"Lept_Phi_z\",\"Final_State_Particles_PDG\",\"Final_State_Particles_Mass\",\"Final_State_Particles_Energy\",\"Final_State_Particles_Momentum_X\",\"Final_State_Particles_Momentum_Y\",\"Final_State_Particles_Momentum_Z\",\"Final_State_Particles_CosTheta\",\"Final_State_Particles_Theta\",\"tot_fKE\",\"p_tot\",\"P_miss\",\"MissE\",\"P_miss_x\",\"P_miss_y\",\"P_miss_z\",\"Topology\"\n";
