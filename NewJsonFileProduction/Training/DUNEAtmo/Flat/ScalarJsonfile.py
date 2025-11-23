@@ -346,7 +346,7 @@ def generate_configuration(csv_file, target_vars, losses, scalar_list):
                 "base_loss_names": losses
             }
         },
-        "model_phys_name": combo_tag,
+        "model_phys_name": f"{csvbase}_{combo_tag}",
         "save_path": f"{output_directory}/LossVars_{combo_tag}/{combo_tag}",
     }
     return config, combo_tag
