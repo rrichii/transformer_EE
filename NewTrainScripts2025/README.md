@@ -8,7 +8,7 @@ The files used for training are organized into **three main categories**:
 
 ## 1. CSV Files
 
-A text file contains **all CSV files** that include:
+A single text file contains **all CSV files** that include:
 
 * the keyword **`NpNpi`**
 * the **highest energy range**
