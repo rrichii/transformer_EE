@@ -26,7 +26,7 @@ The number of JSON files in each is shown in parentheses:
 * **AtmDUNE_NatJson.txt** (596)
 * **BeamDUNE_FlatAr40Json.txt** (256)
 * **BeamDuneOnAxisND_NatJson.txt** (256)
-* **BeamNoVAND_NatJson.txt** (256)
+* **BeamNOvAND_NatJson.txt** (256)
 
 ---
 
@@ -38,7 +38,7 @@ There are **five shell scripts**, one corresponding to each JSON list above:
 * **AtmDUNE_Nat.sh**
 * **BeamDUNE_FlatAr40.sh**
 * **BeamDuneOnAxisND_Nat.sh**
-* **BeamNoVAND_Nat.sh**
+* **BeamNOvAND_Nat.sh**
 
 Each shell script is intended to be submitted on a **separate GPU node**.
 
