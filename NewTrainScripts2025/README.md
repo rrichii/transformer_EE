@@ -59,15 +59,15 @@ Each person must **change the range** to match the subset of files they are resp
 
 #### **AtmDUNE_FlatJson.txt (612 JSON files)**
 
-* **Richi:** 0–203
-* **Dr. Barrow:** 204–407
-* **Casey:** 408–611
+* **Richi:** 0:203
+* **Dr. Barrow:** 204:407
+* **Casey:** 408:611
 
 #### **AtmDUNE_NatJson.txt (596 JSON files)**
 
-* **Richi:** 0–198
-* **Dr. Barrow:** 199–397
-* **Casey:** 398–595
+* **Richi:** 0:198
+* **Dr. Barrow:** 199:397
+* **Casey:** 398:595
 
 #### **Beam JSON lists (each contains 256 files)**
 
@@ -79,9 +79,9 @@ Applies to:
 
 Ranges:
 
-* **Richi:** 0–84
-* **Dr. Barrow:** 85–169
-* **Casey:** 170–255
+* **Richi:** 0:84
+* **Dr. Barrow:** 85:169
+* **Casey:** 170:255
 
 ---
 
