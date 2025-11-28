@@ -94,7 +94,7 @@ Make sure the following are done **before running**:
 1. Clone or pull the **`wide` branch** of the `transformer_EE` repository from GitHub.
 2. Download **all JSON, CSV, and shell script files** into the **same working directory**.
 3. Ensure that each script has the correct slice of `Json_files` based on the ranges above.
-4. Perform initial test runs with fewer epochs and a smaller subset of JSON files to ensure everything runs correctly.
+4. Perform initial test runs with fewer epochs (Right now, the number of epochs is 40 in every shell scripts) and a smaller subset of JSON files to ensure everything runs correctly.
 5. After verifying functionality, update the number of epochs and JSON file ranges to the final values assigned above.
 
 
