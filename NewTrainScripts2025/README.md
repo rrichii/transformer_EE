@@ -44,7 +44,7 @@ Each shell script is intended to be submitted on a **separate GPU node**.
 
 ---
 
-## 4. Updating the JSON File Ranges in Each Script
+## 4. Updating the JSON File Ranges in Each Shell Script
 
 Inside every shell script, you will find a line like:
 
