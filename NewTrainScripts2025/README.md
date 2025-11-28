@@ -75,7 +75,7 @@ Applies to:
 
 * BeamDUNE_FlatAr40Json.txt
 * BeamDuneOnAxisND_NatJson.txt
-* BeamNoVAND_NatJson.txt
+* BeamNOvAND_NatJson.txt
 
 Ranges:
 
