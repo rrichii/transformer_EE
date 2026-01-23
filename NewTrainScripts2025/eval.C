@@ -865,6 +865,7 @@ auto make_hist = [&](const std::string& name, const std::vector<double>& d, doub
 
             if (std::isnan(Etrue) || std::isnan(Epred)) continue;
             if (Etrue == 0) continue; // avoid divide by zero
+            if (Etrue < 0.1 || Etrue > 1) continue;
 
             double thet_true = 0.0;
             double thet_pred = 0.0;
